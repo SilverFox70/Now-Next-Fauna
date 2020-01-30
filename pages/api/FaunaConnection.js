@@ -87,6 +87,41 @@ class FaunaConnection {
     )
   }
 
+  update(ref, collection, data) {
+    return this.client.query(
+      this.q.Update(
+        this.q.Ref(
+          this.q.Collection(collection),
+          ref
+        ),
+        { data : data }
+      )
+    )
+  }
+
+  replace(ref, collection, data) {
+    return this.client.query(
+      this.q.Replace(
+        this.q.Ref(
+          this.q.Collection(collection),
+          ref
+        ),
+        { data: data }
+      )
+    )
+  }
+
+  delete(ref, collection) {
+    return this.client.query(
+      this.q.Delete(
+        this.q.Ref(
+          this.q.Collection(collection),
+          ref
+        )
+      )
+    )
+  }
+
 }
 
 const fauna = new FaunaConnection({secret: secret})
@@ -106,7 +141,8 @@ const fauna = new FaunaConnection({secret: secret})
 //   { title: "Deep meanings ina latte" }
 // ]
 
+
 fauna
-  .getMatch('posts_by_title', 'The story of the wrapper')
+  .delete('256027278950007305', 'posts')
   .then(res => console.log(res))
   .catch(err => console.log(err))
