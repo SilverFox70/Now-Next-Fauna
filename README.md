@@ -64,5 +64,8 @@ The reasoning for this separate file is that this is safer than assuming we shou
 
 Check out the docs [here](https://zeit.co/docs/v2/build-step#defining-a-build-script) for more details on Build and Local Development variables.
 
+### Local using Next
+If what you are trying to do is simply us **Next** for running locally, you'll need to put your environment variables in the `next.configs.js`, which you can read more about [here](https://nextjs.org/docs/api-reference/next.config.js/introduction). I found it helpful to use dotenv and import my local variables that way, but this is mostly because I am just using Next directly for dev purposes.
+
 
 
