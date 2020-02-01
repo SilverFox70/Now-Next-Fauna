@@ -7,6 +7,7 @@ class FaunaConnection {
     const { secret }  = options
     this.q = faunadb.query
     this.client = new faunadb.Client({ secret })
+    this.size = 64;
   }
 
   createDB(name) {
@@ -65,6 +66,21 @@ class FaunaConnection {
     )
   }
 
+  createMultipleCustomID(collection, touples) {
+    return this.client.query(
+      this.q.Map(
+        touples,
+        this.q.Lambda(
+          ['id', 'data'],
+          this.q.Create(
+            this.q.Ref(this.q.Collection(collection), this.q.Var('id')),
+            { data: this.q.Var('data') }
+          )
+        )
+      )
+    )
+  }
+
   get(ref, collection) {
     return this.client.query(
       this.q.Get(
@@ -83,6 +99,45 @@ class FaunaConnection {
           this.q.Index(index),
           value
         )
+      )
+    )
+  }
+
+  getAllRefs(index, size) {
+    return this.client.query(
+      this.q.Paginate(
+        this.q.Match(
+          this.q.Index(index)
+        ),
+        { size: size || this.size }
+      )
+    )
+  }
+
+  _buildRef(options) {
+    return this.q.Ref(this.q.Collection(options.collection), options.ref)
+  }
+
+  getAllByIndex(index, size, before, after) {
+    if (before.collection) {
+      before = this._buildRef(before)
+    } 
+    else if (after.collection) {
+      after = this._buildRef(after)
+    }
+    return this.client.query(
+      this.q.Map(
+        this.q.Paginate(
+          this.q.Match(
+            this.q.Index(index)
+          ),
+          { 
+            size: size || this.size,
+            before: before || undefined,
+            after: after || undefined
+           }
+        ),
+        ref => this.q.Get(ref) 
       )
     )
   }
@@ -122,27 +177,38 @@ class FaunaConnection {
     )
   }
 
+  paginateDB(dbName, size) {
+    return this.client.query(
+      this.q.Paginate(
+        this.q.Database(dbName),
+        { size: size || this.size }
+      )
+    )
+  }
+
+  getDatabase(dbName) {
+    return this.client.query(
+      this.q.Get(
+        this.q.Database(dbName)
+      )
+    )
+  }
+
 }
+
 
 const fauna = new FaunaConnection({secret: secret})
 
-// const terms = {
-// //   field: ['data', 'title']
-// // }
-// const doc = {
-//   title: "The story of the wrapper",
-//   author: "Me 4 Reals",
-//   post: "A long time ago, in a kitchen far, far away..."
-// }
-
-// const docs = [
-//   { title: "My cat and other marvels" },
-//   { title: "Pondering during a commute" },
-//   { title: "Deep meanings ina latte" }
-// ]
-
-
 fauna
-  .delete('256027278950007305', 'posts')
-  .then(res => console.log(res))
+  .getAllByIndex('all_letters', 3)
+  .then(res => {
+    console.log(res)
+    // fauna
+    //   .getAllByIndex('all_letters', 3, 0, res.after)
+    //   .then(res => console.log(res))
+    //   .catch(err => console.log(err))
+
+  })
   .catch(err => console.log(err))
+
+
