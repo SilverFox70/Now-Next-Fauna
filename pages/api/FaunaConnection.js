@@ -10,12 +10,27 @@ class FaunaConnection {
     this.size = 64;
   }
 
+  /**
+   * If the client was instantiated using an admin key
+   * this will create a database with the given name.
+   * 
+   * @param  {[type]} name [description]
+   * @return {[type]}      [description]
+   */
   createDB(name) {
     return this.client.query(
       this.q.CreateDatabase({ name: name })
     )
   }
 
+  /**
+   * If the client was instantiated with at least a
+   * databse key, this will return a server role for
+   * the given named database.
+   * 
+   * @param  {[type]} dbName [description]
+   * @return {[type]}        [description]
+   */
   createServer(dbName) {
     return this.client.query(
       this.q.CreateKey({
@@ -25,12 +40,27 @@ class FaunaConnection {
     )
   }
 
+  /**
+   * Creates a collection of the given name
+   * 
+   * @param  {[type]} name [description]
+   * @return {[type]}      [description]
+   */
   createCollection(name) {
     return this.client.query(
       this.q.CreateCollection({ name: name})
     )
   }
 
+  /**
+   * Creates an index for use on a collection
+   * 
+   * @param  {string} name   descriptive name for the index
+   * @param  {string} src    the name of the collection to apply this to
+   * @param  {Array} terms   the terms to be used for the index
+   * @param  {Array} values  the values to be used for the index
+   * @return {Object}        the index object
+   */
   createIndex(name, src, terms=null, values=null) {
     return this.client.query(
       this.q.CreateIndex({
@@ -42,6 +72,12 @@ class FaunaConnection {
     )
   }
 
+  /**
+   * Creates a document within the named collection
+   * @param  {string} collection name of the collection to put the doc into
+   * @param  {Object} doc        the document to put in the database collection
+   * @return {Object}            the document that was inserted
+   */
   create(collection, doc) {
     return this.client.query(
       this.q.Create(
@@ -51,6 +87,14 @@ class FaunaConnection {
     )
   }
 
+  /**
+   * Given an array of documents will iterate through and place each
+   * on3 into the given collection in the database.
+   * 
+   * @param  {string} collection name of the collection to put the docs into
+   * @param  {Array} docs        the documents to put in the database collection
+   * @return {Array}             an array of the documents put in the database
+   */
   createMultiple(collection, docs) {
     return this.client.query(
       this.q.Map(
@@ -66,6 +110,15 @@ class FaunaConnection {
     )
   }
 
+  /**
+   * Given an array of touples [custom id,document] will iterate through 
+   * and place each into the given collection in the database with the 
+   * custom id is the 'ref' field for the document.
+   * 
+   * @param  {string} collection name of the collection to put the docs into
+   * @param  {Array} docs        the documents to put in the database collection
+   * @return {Array}             an array of the documents put in the database
+   */
   createMultipleCustomID(collection, touples) {
     return this.client.query(
       this.q.Map(
