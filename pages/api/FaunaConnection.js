@@ -2,6 +2,9 @@ require('dotenv').config()
 const faunadb = require('faunadb')
 const secret = process.env.FAUNADB_SECRET_KEY
 
+/**
+ * A wrapper class for using the faunuDB javascript API
+ */
 class FaunaConnection {
   constructor(options) {
     const { secret }  = options
