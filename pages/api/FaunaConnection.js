@@ -17,8 +17,8 @@ class FaunaConnection {
    * If the client was instantiated using an admin key
    * this will create a database with the given name.
    * 
-   * @param  {[type]} name [description]
-   * @return {[type]}      [description]
+   * @param  {string} name the name to use for the database
+   * @return {Object}      Response object with database name and ref
    */
   createDB(name) {
     return this.client.query(
@@ -31,8 +31,8 @@ class FaunaConnection {
    * databse key, this will return a server role for
    * the given named database.
    * 
-   * @param  {[type]} dbName [description]
-   * @return {[type]}        [description]
+   * @param  {string} dbName the name of the database to create a server for
+   * @return {Object}        Response object with database name and ref 
    */
   createServer(dbName) {
     return this.client.query(
