@@ -181,9 +181,10 @@ class FaunaConnection {
    * Given an index 'all_<items>' with no set terms or values,
    * this will return the refs of all documents in that index.
    * 
-   * @param  {[type]} index [description]
-   * @param  {[type]} size  [description]
-   * @return {[type]}       [description]
+   * @param  {string} index  name of the index to use
+   * @param  {integer} size  number of docs to be returned per page
+   * @return {Array}         an array of the refs to the docs within
+   * the index
    */
   getAllRefsByIndex(index, size) {
     return this.client.query(
