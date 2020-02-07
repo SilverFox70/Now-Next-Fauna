@@ -1,6 +1,6 @@
-require('dotenv').config()
+// require('dotenv').config()
+// const secret = process.env.FAUNADB_SECRET_KEY
 const faunadb = require('faunadb')
-const secret = process.env.FAUNADB_SECRET_KEY
 
 /**
  * A wrapper class for using the faunuDB javascript API
@@ -76,32 +76,17 @@ class FaunaConnection {
   }
 
   /**
-   * Creates a document within the named collection
+   * Creates a document within the named collection given either single doc
+   * or an array of documents.
    * @param  {string} collection name of the collection to put the doc into
    * @param  {Object} doc        the document to put in the database collection
    * @return {Object}            the document that was inserted
    */
-  create(collection, doc) {
-    return this.client.query(
-      this.q.Create(
-        this.q.Collection(collection),
-        { data: doc }
-      )
-    )
-  }
-
-  /**
-   * Given an array of documents will iterate through and place each
-   * on3 into the given collection in the database.
-   * 
-   * @param  {string} collection name of the collection to put the docs into
-   * @param  {Array} docs        the documents to put in the database collection
-   * @return {Array}             an array of the documents put in the database
-   */
-  createMultiple(collection, docs) {
+  create(collection, docs) {
+    const documents = Array.isArray(docs) ? docs : [docs]
     return this.client.query(
       this.q.Map(
-        docs,
+        documents,
         this.q.Lambda(
           'doc',
           this.q.Create(
@@ -122,7 +107,7 @@ class FaunaConnection {
    * @param  {Array} docs        the documents to put in the database collection
    * @return {Array}             an array of the documents put in the database
    */
-  createMultipleCustomID(collection, touples) {
+  createWithCustomID(collection, touples) {
     return this.client.query(
       this.q.Map(
         touples,
@@ -140,11 +125,11 @@ class FaunaConnection {
   /**
    * Retrieve a document given its ref and collection
    * 
-   * @param  {string} ref        the ID or ref of the document
    * @param  {string} collection the name of the collection
+   * @param  {string} ref        the ID or ref of the document
    * @return {Object}            the document identified by the query
    */
-  get(ref, collection) {
+  get(collection, ref) {
     return this.client.query(
       this.q.Get(
         this.q.Ref(
@@ -243,12 +228,12 @@ class FaunaConnection {
    * Given the ref and collection this will update the
    * data of that document.
    * 
-   * @param  {string} ref        the ID or ref of the doc
    * @param  {string} collection the name of the collection
+   * @param  {string} ref        the ID or ref of the doc
    * @param  {Object} data       the data to be updated
    * @return {Object}            the updated document
    */
-  update(ref, collection, data) {
+  update(collection, ref, data) {
     return this.client.query(
       this.q.Update(
         this.q.Ref(
@@ -266,12 +251,12 @@ class FaunaConnection {
    * Any old fields in the document that are not mentioned in
    * the data param are removed.
    * 
-   * @param  {string} ref        the ID or ref of the doc
    * @param  {string} collection the name of the collection
+   * @param  {string} ref        the ID or ref of the doc
    * @param  {Object} data       the data to be replace
    * @return {Object}            the updated document
    */
-  replace(ref, collection, data) {
+  replace(collection, ref, data) {
     return this.client.query(
       this.q.Replace(
         this.q.Ref(
@@ -285,11 +270,12 @@ class FaunaConnection {
 
   /**
    * Destroys a document
-   * @param  {string} ref        the ID or ref of the doc
+   * 
    * @param  {string} collection the name of the collection
+   * @param  {string} ref        the ID or ref of the doc
    * @return {Object}            the deleted document
    */
-  delete(ref, collection) {
+  delete(collection, ref) {
     return this.client.query(
       this.q.Delete(
         this.q.Ref(
@@ -320,19 +306,38 @@ class FaunaConnection {
 }
 
 
-const fauna = new FaunaConnection({secret: secret})
+// const fauna = new FaunaConnection({secret: secret})
 
-opts = {
-  term: 'Alan'
-}
+export default FaunaConnection
 
-fauna
-  .getAllRefsByIndex('posts_by_title')
-  .then(res => {
-    console.log(res)
-    if (res.data.length > 0) res.data.forEach(doc => console.log('doc: ', doc))
+// fauna
+//   .client
+//   .query(
+//     fauna.q.CreateFunction({
+//       name: "create_entry",
+//       body: fauna.q.Query(
+//         fauna.q.Lambda(
+//           ['title', 'body'],
+//           fauna.q.Create(
+//             fauna.q.Collection('posts'),
+//             {
+//               data: {
+//                 title: fauna.q.Var('title'),
+//                 body: fauna.q.Var('body')
+//               }
+//             }
+//           )
+//         )
+//       ),
+//       permissions: { call: 'public' },
+//       role: 'server'
+//     })
+//   )
+//   .then(res => {
+//     console.log(res)
+//     if (res.data && res.data.length > 0) res.data.forEach(doc => console.log('doc: ', doc))
 
-  })
-  .catch(err => console.log(err))
+//   })
+//   .catch(err => console.log(err))
 
 
